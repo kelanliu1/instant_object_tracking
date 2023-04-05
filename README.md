@@ -1,4 +1,4 @@
-### Tiny Sieve
+# Tiny Sieve
 
 Sieve Challenge:
 This project is a mini version of Sieve that allows users to send a video, process the video, and retrieve the information that has been processed. The project is implemented in Python using the Flask framework.
