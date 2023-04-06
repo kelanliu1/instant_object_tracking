@@ -1,0 +1,7 @@
+Flask
+torch
+torchvision
+yolov5
+filterpy
+scikit-image
+opencv-python
