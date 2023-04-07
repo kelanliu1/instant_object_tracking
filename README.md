@@ -19,6 +19,10 @@ This will start the Flask development server, usually at `http://127.0.0.1:5000/
 
 This script will send HTTP requests to the Flask app endpoints and display the responses in the terminal or command prompt.
 
+## Sample Video Output
+
+https://user-images.githubusercontent.com/67593159/230647210-5fe0d970-b998-4e33-8d18-123ab625943e.mp4
+
 ## License
 
 This project is open-source and available under the [MIT License](LICENSE).
