@@ -11,7 +11,7 @@ This project is a mini version of Sieve that allows users to send a video, proce
 
 This will start the Flask development server, usually at `http://127.0.0.1:5000/` (also accessible via `http://localhost:5000/`).
 
-2. Keep the Flask app running while testing it with the `test.py` script. Open another terminal or command prompt, navigate to the project directory, and activate the virtual environment as described in the Setup section.
+2. Keep the Flask app running while testing it with the `test.py` script on a different terminal.
 
 3. Run the test script by executing the following command:
 
