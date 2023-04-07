@@ -1,6 +1,5 @@
 import cv2
 import torch
-import torch
 from sort import *
 from flask import Flask, request, jsonify
 import uuid
