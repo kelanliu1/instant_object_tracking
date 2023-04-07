@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 ### Global variables ##################################################################################################
 DEBUG = False
+NUM_WORKER_THREADS = 4  # Change this to adjust the number of parallel workers
 video_jobs = {}
 video_processing_queue = queue.Queue()
 
@@ -24,8 +25,7 @@ def worker():
         process_video(job_id, source_url)
         video_processing_queue.task_done()
 
-num_worker_threads = 4  # Change this to adjust the number of parallel workers
-for _ in range(num_worker_threads):
+for _ in range(NUM_WORKER_THREADS):
     t = threading.Thread(target=worker)
     t.daemon = True  # Mark as a daemon thread so it exits when the main thread exits
     t.start()
