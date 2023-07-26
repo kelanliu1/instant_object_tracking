@@ -1,6 +1,5 @@
-# Tiny Sieve
+# Instant Object Tracking
 
-Sieve Challenge:
 This project is a mini version of Sieve that allows users to send a video, process the video, and retrieve the information that has been processed (bounding boxes, classification, class probabilties, etc.). The project is implemented in Python using the Flask framework.
 
 ## Running the Project
