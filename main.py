@@ -5,9 +5,12 @@ from flask import Flask, request, jsonify
 import uuid
 import threading
 import queue
+import os
+from flask_cors import CORS
 
 # Initialize the Flask app
 app = Flask(__name__)
+CORS(app)
 
 ### Global variables ##################################################################################################
 DEBUG = False
