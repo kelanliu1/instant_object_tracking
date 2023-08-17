@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Form from 'react-bootstrap/Form';
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import ReactPlayer from 'react-player';
 import TrackingProgressBar from "./ProgressBar";
 //import { pushJob, checkJobStatus, getJobResults } from "./Api";
 
 const App = () => {
   const [url, setUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState(''); // State to hold the new video URL
   const [jobId, setJobId] = useState(null);
   const [jobStatus, setJobStatus] = useState('');  // Possible values: '', 'queued', 'processing', 'finished'
 
+
   // Handle process button click
   const handleProcess = async () => {
-    console.log(url); // test
     try{
       const response = await fetch("http://localhost:5000/push", {
         method: "POST",
@@ -58,6 +59,10 @@ const App = () => {
         const response = await fetch(`http://localhost:5000/query/${jobId}`);
         const data = await response.json();
         console.log(data['data (/query)']);
+        const vidUrl = `http://localhost:5000${data['video_url']}`;
+        setVideoUrl(vidUrl); // Set the video URL if it exists
+        console.log(vidUrl);
+      
       } catch (error) {
         console.log("Failed to fetch job status: ", error);
       }
@@ -93,11 +98,19 @@ const App = () => {
         />
       </Form.Group>
       <Button onClick={handleProcess} >Process</Button>
+
       <div>
         {url && (
-          <video width="640" height="480" controls>
+          <video width="768" height="576" controls>
             <source src={ url } type="video/mp4" />
             Your browser does not support the video tag.
+          </video>
+        )}
+      
+        {videoUrl && (
+          <video width="768" height="576" controls crossOrigin="anonymous" style={{ paddingLeft: '20px' }}>
+              <source src={videoUrl} type="video/webm" />
+              Your browser does not support the video tag.
           </video>
         )}
       </div>

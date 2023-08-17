@@ -7,10 +7,16 @@ import threading
 import queue
 import os
 from flask_cors import CORS
+from flask import send_from_directory
 
 # Initialize the Flask app
 app = Flask(__name__)
 CORS(app)
+
+# Video path
+VIDEO_SAVE_PATH = "videos"
+if not os.path.exists(VIDEO_SAVE_PATH):
+    os.makedirs(VIDEO_SAVE_PATH)
 
 ### Global variables ##################################################################################################
 DEBUG = False
@@ -74,9 +80,22 @@ def status(id):
 @app.route('/query/<job_id>', methods=['GET'])
 def query(job_id):
     if job_id in video_jobs:
-        return jsonify({'data (/query)': video_jobs[job_id]['data']})
+        video_path = video_jobs[job_id].get('video_path')
+        if video_path:
+            video_url = f"/videos/{os.path.basename(video_path)}"
+
+            return jsonify({
+                'video_url': video_url,
+                'data (/query)': video_jobs[job_id]['data']
+            })
+        else:
+            return jsonify({'error (/query)': 'video not processed'}), 404
     else:
         return jsonify({'error (/query)': 'job id not found'}), 404
+
+@app.route('/videos/<filename>', methods=['GET'])
+def serve_video(filename):
+    return send_from_directory(VIDEO_SAVE_PATH, filename, as_attachment=False, mimetype='video/mp4')
 
 # Route to handle list
 @app.route('/list', methods=['GET'])
@@ -84,56 +103,84 @@ def list_jobs():
     return jsonify({'data (/list)': list(video_jobs.keys())})
 
 def process_video(job_id, source_url, yolo_model_name='yolov5s'):
+    # Initial status
     video_jobs[job_id] = {
         'status': 'processing',
         'data': None,
     }
 
+    # Check if the source URL is valid and the video can be opened
     cap = cv2.VideoCapture(source_url)
+    if not cap.isOpened():
+        video_jobs[job_id]['status'] = 'error'
+        video_jobs[job_id]['error_msg'] = 'Cannot open video source'
+        return
+    
     frame_number = 0
     detections = []
+
+    frame_width  = int(cap.get(3))
+    frame_height = int(cap.get(4))
+
+    output_path = os.path.join(VIDEO_SAVE_PATH, f"{job_id}.webm")
+    fourcc = cv2.VideoWriter_fourcc(*'vp80')
+    out = cv2.VideoWriter(output_path, fourcc, 20.0, (frame_width, frame_height))
 
     model.float()
     model.eval()
     tracker = Sort()
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+    try:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-        preds = model(frame)
-        yolov5_detections = preds.pred[0].numpy()
-        tracked_objects = tracker.update(yolov5_detections)
+            preds = model(frame)
+            yolov5_detections = preds.pred[0].numpy()
+            tracked_objects = tracker.update(yolov5_detections)
 
-        for j in range(len(tracked_objects.tolist())):
-            coords = tracked_objects.tolist()[j]
-            x1, y1, x2, y2, track_id = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3]), int(coords[4])
+            for j in range(len(tracked_objects.tolist())):
+                coords = tracked_objects.tolist()[j]
+                x1, y1, x2, y2, track_id = int(coords[0]), int(coords[1]), int(coords[2]), int(coords[3]), int(coords[4])
 
-            class_idx = int(yolov5_detections[j, 5])
-            class_name = preds.names[class_idx]
-            class_prob = float(yolov5_detections[j, 4])
+                class_idx = int(yolov5_detections[j, 5])
+                class_name = preds.names[class_idx]
+                class_prob = float(yolov5_detections[j, 4])
 
-            detections.append({
-                'frame': frame_number,
-                'x1': x1,
-                'y1': y1,
-                'x2': x2,
-                'y2': y2,
-                'id': int(track_id),
-                'class_id': int(class_idx),
-                'class_name': class_name,
-                'confidence': class_prob,
-            })
+                detections.append({
+                    'frame': frame_number,
+                    'x1': x1,
+                    'y1': y1,
+                    'x2': x2,
+                    'y2': y2,
+                    'id': int(track_id),
+                    'class_id': int(class_idx),
+                    'class_name': class_name,
+                    'confidence': class_prob,
+                })
 
-        frame_number += 1
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                label = f"{class_name} {class_prob:.2f}"
+                cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 2)
+            
+            out.write(frame)
+            frame_number += 1
 
-    video_jobs[job_id] = {
-        'status': 'finished',
-        'data': detections,
-    }
+        cap.release()
+        out.release()
 
-    if DEBUG: print(video_jobs[job_id]['data']) 
+        video_jobs[job_id] = {
+            'status': 'finished',
+            'data': detections,
+            'video_path': output_path
+        }
+    except Exception as e:
+        # If an error occurs during processing, update the status and capture the error message
+        video_jobs[job_id]['status'] = 'error'
+        video_jobs[job_id]['error_msg'] = str(e)
+
+    if DEBUG: print(video_jobs[job_id]['data'])
 
 if __name__ == '__main__':
     app.run(debug=True)
