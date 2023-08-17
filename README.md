@@ -1,6 +1,6 @@
 # Instant Object Tracking
 
-This project is a mini version of Sieve that allows users to send a video, process the video, and retrieve the information that has been processed (bounding boxes, classification, class probabilties, etc.). The project is implemented in Python using the Flask framework.
+This project allows users to send a video, process the video, and retrieve the information and new video that has been processed (bounding boxes, classification, class probabilties, etc.). The project is implemented in Python using the Flask framework for the back-end and JavaScript and React in the front-end.
 
 ## Running the Project
 
