@@ -4,7 +4,7 @@ This project is a mini version of Sieve that allows users to send a video, proce
 
 ## Running the Project
 
-1. Run the Flask app by executing the following command in the terminal or command prompt:
+1. Run the Flask back-end by executing the following command in the terminal or command prompt:
 
 ```python main.py```
 
@@ -12,11 +12,19 @@ This will start the Flask development server, usually at `http://127.0.0.1:5000/
 
 2. Keep the Flask app running while testing it with the `test.py` script on a different terminal.
 
-3. Run the test script by executing the following command:
+3. Run the test script by executing the following command (optional):
 
 ```python test.py```
 
-This script will send HTTP requests to the Flask app endpoints and display the responses in the terminal or command prompt.
+This script will send HTTP requests to the Flask app endpoints and display the responses in the terminal or command prompt
+
+4. Run the React front-end by executing the following command in another terminal or command prompt:
+
+```npm start```
+
+This will start the React app, at `http://127.0.0.1:3000/` (also accessible via `http://localhost:3000/`).
+
+Here's a sample video link you can use as an example: https://storage.googleapis.com/sieve-public-videos/celebrity-videos/dwyane_basketball.mp4
 
 ## Sample Video Output
 
